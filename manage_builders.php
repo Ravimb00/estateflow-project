@@ -6,6 +6,7 @@ ini_set('display_errors',1);
 session_start();
 
 include 'config/db.php';
+include 'mail_config.php';
 
 /* ADMIN CHECK */
 
@@ -22,11 +23,96 @@ if(isset($_GET['available'])){
 
 $id = $_GET['available'];
 
+/* GET BUILDER */
+
+$getBuilder = mysqli_fetch_assoc(
+
 mysqli_query(
+
 $conn,
+
+"SELECT * FROM builders
+WHERE id='$id'"
+
+)
+
+);
+
+/* UPDATE STATUS */
+
+mysqli_query(
+
+$conn,
+
 "UPDATE builders
 SET status='available'
 WHERE id='$id'"
+
+);
+
+/* GET USER */
+
+$user_id = $getBuilder['user_id'];
+
+$getUser = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM users
+WHERE id='$user_id'"
+
+)
+
+);
+
+$userEmail = $getUser['email'];
+
+/* SEND MAIL */
+
+$subject = "EstateFlow Builder Status Approved";
+
+$body = "
+
+<h2>Hello from EstateFlow 👋</h2>
+
+<p>
+Dear Customer,
+</p>
+
+<p>
+We are pleased to inform you that your Builder request has been marked as Available successfully by the EstateFlow Management Team.
+</p>
+
+<p>
+
+<b>Builder Name:</b>
+".$getBuilder['builder_name']." <br>
+
+<b>Location:</b>
+".$getBuilder['location']." <br>
+
+<b>Status:</b>
+Available ✅
+
+</p>
+
+<p>
+Thank you for choosing EstateFlow.
+</p>
+
+<p>
+Warm Regards,<br>
+<b>EstateFlow Management Team</b>
+</p>
+
+";
+
+sendMail(
+$userEmail,
+$subject,
+$body
 );
 
 header("Location:manage_builders.php");
@@ -40,11 +126,96 @@ if(isset($_GET['unavailable'])){
 
 $id = $_GET['unavailable'];
 
+/* GET BUILDER */
+
+$getBuilder = mysqli_fetch_assoc(
+
 mysqli_query(
+
 $conn,
+
+"SELECT * FROM builders
+WHERE id='$id'"
+
+)
+
+);
+
+/* UPDATE STATUS */
+
+mysqli_query(
+
+$conn,
+
 "UPDATE builders
 SET status='unavailable'
 WHERE id='$id'"
+
+);
+
+/* GET USER */
+
+$user_id = $getBuilder['user_id'];
+
+$getUser = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM users
+WHERE id='$user_id'"
+
+)
+
+);
+
+$userEmail = $getUser['email'];
+
+/* SEND MAIL */
+
+$subject = "EstateFlow Builder Status Update";
+
+$body = "
+
+<h2>Hello from EstateFlow 👋</h2>
+
+<p>
+Dear Customer,
+</p>
+
+<p>
+Your Builder request has been marked as Unavailable by the EstateFlow Management Team.
+</p>
+
+<p>
+
+<b>Builder Name:</b>
+".$getBuilder['builder_name']." <br>
+
+<b>Location:</b>
+".$getBuilder['location']." <br>
+
+<b>Status:</b>
+Unavailable ❌
+
+</p>
+
+<p>
+For additional clarification please contact EstateFlow Support.
+</p>
+
+<p>
+Warm Regards,<br>
+<b>EstateFlow Management Team</b>
+</p>
+
+";
+
+sendMail(
+$userEmail,
+$subject,
+$body
 );
 
 header("Location:manage_builders.php");
@@ -348,7 +519,6 @@ Dashboard
 
 <th>Location</th>
 
-
 <th>Purpose</th>
 
 <th>Acres Needed</th>
@@ -384,7 +554,6 @@ while($row = mysqli_fetch_assoc($getData)){
 <td>
 <?php echo $row['location']; ?>
 </td>
-
 
 <td>
 <?php echo $row['purpose_type']; ?>

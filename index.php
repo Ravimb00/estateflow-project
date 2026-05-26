@@ -199,11 +199,12 @@ rel="stylesheet">
             </div>
  
             <div id="managerLogin" style="display:none;">
-                <form action="admin_login.php" method="POST">
-                    <input type="email" name="email" placeholder="Management Email" required>
-                    <input type="password" name="password" placeholder="Password" required>
-                    <button type="submit" class="submit-btn manager">Secure Login</button>
-                </form>
+                <div style="padding:14px;border-radius:14px;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.18);margin-bottom:16px;font-size:13px;color:rgba(255,255,255,0.65);line-height:1.5;">
+                    🔐 Admin login has <strong style="color:rgba(255,255,255,0.85)">Biometric & OTP</strong> support.<br>Click below to access the full admin login page.
+                </div>
+                <button type="button" class="submit-btn manager" onclick="window.location.href='admin_login.php'">
+                    🏛️ Go to Admin Login
+                </button>
             </div>
  
         </div>
@@ -271,4 +272,3 @@ rel="stylesheet">
  
 </body>
 </html>
- 

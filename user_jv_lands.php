@@ -11,6 +11,16 @@ if(!isset($_SESSION['user_email'])){
     exit();
 }
 
+/* USER DETAILS */
+
+$user_email = $_SESSION['user_email'];
+
+/* TEMP USER ID FIX */
+
+$user_id = isset($_SESSION['user_id'])
+? $_SESSION['user_id']
+: 1;
+
 /* SUCCESS MESSAGE */
 
 $success = "";
@@ -58,7 +68,9 @@ if(isset($_POST['add_jv'])){
         builder,
         acres,
         deal_value,
-        status
+        status,
+        submitted_by,
+        user_id
     )
 
     VALUES
@@ -68,7 +80,9 @@ if(isset($_POST['add_jv'])){
         '$builder',
         '$acres',
         '$deal_value',
-        '$status'
+        '$status',
+        '$user_email',
+        '$user_id'
     )"
 
     );
@@ -94,7 +108,7 @@ Acres     : $acres
 Deal Value: $deal_value
 
 Added By User:
-".$_SESSION['user_email']."
+$user_email
 
 EstateFlow Notification System
 
@@ -105,9 +119,7 @@ EstateFlow Notification System
     }else{
 
         $error = "Something went wrong";
-
     }
-
 }
 ?>
 
@@ -392,8 +404,6 @@ font-size:12px;
 
 <body>
 
-<!-- NAVBAR -->
-
 <div class="navbar">
 
 <div class="logo">
@@ -401,8 +411,6 @@ EstateFlow
 </div>
 
 </div>
-
-<!-- FLOATING BUTTONS -->
 
 <div class="float-actions">
 
@@ -417,8 +425,6 @@ Logout
 </a>
 
 </div>
-
-<!-- HERO -->
 
 <div class="hero">
 
@@ -435,8 +441,6 @@ Submit your JV Land details securely
 </div>
 
 </div>
-
-<!-- CONTAINER -->
 
 <div class="container">
 

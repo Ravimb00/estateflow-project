@@ -6,6 +6,7 @@ ini_set('display_errors',1);
 session_start();
 
 include 'config/db.php';
+include 'mail_config.php';
 
 /* ADMIN LOGIN CHECK */
 
@@ -25,6 +26,23 @@ if(isset($_GET['approve'])){
 
 $id = $_GET['approve'];
 
+/* GET LAND */
+
+$getLand = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM jv_lands
+WHERE id='$id'"
+
+)
+
+);
+
+/* UPDATE STATUS */
+
 mysqli_query(
 
 $conn,
@@ -33,6 +51,185 @@ $conn,
 SET status='approved'
 WHERE id='$id'"
 
+);
+
+/* USER DETAILS */
+
+$user_id = $getLand['user_id'];
+
+$getUser = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM users
+WHERE id='$user_id'"
+
+)
+
+);
+
+$userEmail = $getUser['email'];
+
+/* SEND MAIL */
+
+$subject = "EstateFlow Property Approval Confirmation";
+
+$body = "
+
+<h2>Hello from EstateFlow 👋</h2>
+
+<p>
+Dear Customer,
+</p>
+
+<p>
+We are pleased to inform you that your submitted JV Land request has been successfully approved by the EstateFlow Management Team.
+</p>
+
+<p>
+
+<b>Land Name:</b>
+".$getLand['land_name']." <br>
+
+<b>Location:</b>
+".$getLand['location']." <br>
+
+<b>Status:</b>
+Approved ✅
+
+</p>
+
+<p>
+Our team may contact you shortly regarding the next process and verification steps.
+</p>
+
+<p>
+Thank you for choosing EstateFlow.
+</p>
+
+<p>
+Warm Regards,<br>
+<b>EstateFlow Management Team</b>
+</p>
+
+";
+
+sendMail(
+$userEmail,
+$subject,
+$body
+);
+
+header(
+"Location:manage_jv.php"
+);
+
+exit();
+
+}
+
+/* REJECT JV */
+
+if(isset($_GET['reject'])){
+
+$id = $_GET['reject'];
+
+/* GET LAND */
+
+$getLand = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM jv_lands
+WHERE id='$id'"
+
+)
+
+);
+
+/* UPDATE STATUS */
+
+mysqli_query(
+
+$conn,
+
+"UPDATE jv_lands
+SET status='Rejected'
+WHERE id='$id'"
+
+);
+
+/* USER DETAILS */
+
+$user_id = $getLand['user_id'];
+
+$getUser = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM users
+WHERE id='$user_id'"
+
+)
+
+);
+
+$userEmail = $getUser['email'];
+
+/* SEND MAIL */
+
+$subject = "EstateFlow Property Status Update";
+
+$body = "
+
+<h2>Hello from EstateFlow 👋</h2>
+
+<p>
+Dear Customer,
+</p>
+
+<p>
+We regret to inform you that your submitted JV Land request could not be approved by the EstateFlow Management Team at this time.
+</p>
+
+<p>
+
+<b>Land Name:</b>
+".$getLand['land_name']." <br>
+
+<b>Location:</b>
+".$getLand['location']." <br>
+
+<b>Status:</b>
+Rejected ❌
+
+</p>
+
+<p>
+For additional information or clarification, please contact EstateFlow Support.
+</p>
+
+<p>
+Thank you for your understanding.
+</p>
+
+<p>
+Warm Regards,<br>
+<b>EstateFlow Management Team</b>
+</p>
+
+";
+
+sendMail(
+$userEmail,
+$subject,
+$body
 );
 
 header(
@@ -55,6 +252,7 @@ $conn,
 
 "DELETE FROM jv_lands
 WHERE id='$id'"
+
 );
 
 header(
@@ -125,8 +323,6 @@ color:white;
 
 }
 
-/* TOP */
-
 .top{
 
 display:flex;
@@ -164,8 +360,6 @@ font-weight:700;
 
 }
 
-/* TABLE BOX */
-
 .table-box{
 
 background:rgba(255,255,255,.08);
@@ -181,8 +375,6 @@ border-radius:28px;
 overflow:auto;
 
 }
-
-/* TABLE */
 
 table{
 
@@ -214,8 +406,6 @@ font-size:14px;
 
 }
 
-/* STATUS */
-
 .pending{
 
 color:#facc15;
@@ -230,7 +420,12 @@ font-weight:700;
 
 }
 
-/* BUTTONS */
+.rejected{
+
+color:#f97316;
+font-weight:700;
+
+}
 
 .btn{
 
@@ -250,8 +445,6 @@ margin-right:10px;
 
 }
 
-/* APPROVE */
-
 .approve{
 
 background:linear-gradient(
@@ -264,7 +457,17 @@ color:white;
 
 }
 
-/* DELETE */
+.reject{
+
+background:linear-gradient(
+135deg,
+#f59e0b,
+#ea580c
+);
+
+color:white;
+
+}
 
 .delete{
 
@@ -376,7 +579,19 @@ if($row['status']=="approved"){
 Approved
 </span>
 
-<?php }else{ ?>
+<?php
+}
+elseif($row['status']=="Rejected"){
+?>
+
+<span class="rejected">
+Rejected
+</span>
+
+<?php
+}
+else{
+?>
 
 <span class="pending">
 Pending
@@ -397,6 +612,20 @@ href="?approve=<?php echo $row['id']; ?>"
 class="btn approve">
 
 Approve
+
+</a>
+
+<?php } ?>
+
+<?php
+if($row['status']!="Rejected"){
+?>
+
+<a
+href="?reject=<?php echo $row['id']; ?>"
+class="btn reject">
+
+Reject
 
 </a>
 

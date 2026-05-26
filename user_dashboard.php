@@ -1,10 +1,67 @@
 <?php
 session_start();
 
+include 'config/db.php';
+
 if(!isset($_SESSION['user_email'])){
     header("Location:user_login.php");
     exit();
 }
+
+$userName = $_SESSION['user_name'] ?? $_SESSION['user_email'];
+
+/* USER ID */
+
+$user_id = $_SESSION['user_id'];
+
+/* APPROVED */
+
+$approvedProperties = mysqli_num_rows(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM jv_lands
+WHERE user_id='$user_id'
+AND status='approved'"
+
+)
+
+);
+
+/* PENDING */
+
+$pendingProperties = mysqli_num_rows(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM jv_lands
+WHERE user_id='$user_id'
+AND status='pending'"
+
+)
+
+);
+
+/* REJECTED */
+
+$rejectedProperties = mysqli_num_rows(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM jv_lands
+WHERE user_id='$user_id'
+AND status='rejected'"
+
+)
+
+);
+
 ?>
 
 <!DOCTYPE html>
@@ -18,10 +75,11 @@ if(!isset($_SESSION['user_email'])){
 content="width=device-width, initial-scale=1.0">
 
 <title>
-EstateFlow User Dashboard
+EstateFlow – User Dashboard
 </title>
 
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
 
 <style>
 
@@ -36,249 +94,423 @@ body{
 background:#020617;
 color:white;
 overflow-x:hidden;
+min-height:100vh;
+}
+
+/* SLIDESHOW */
+
+.slide-bg{
+position:fixed;
+inset:0;
+z-index:0;
+}
+
+.slide{
+position:absolute;
+inset:0;
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+opacity:0;
+transition:opacity 2.4s ease-in-out;
+animation:kb 14s ease-in-out infinite alternate;
+}
+
+.slide.active{
+opacity:1;
+}
+
+@keyframes kb{
+
+0%{
+transform:scale(1.00) translate(0,0)
+}
+
+100%{
+transform:scale(1.09) translate(-14px,-8px)
+}
+
+}
+
+.slide:nth-child(1){
+background-image:url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=95');
+}
+
+.slide:nth-child(2){
+background-image:url('https://images.unsplash.com/photo-1494526585095-c41746248156?w=1920&q=95');
+}
+
+.slide:nth-child(3){
+background-image:url('https://images.unsplash.com/photo-1460317442991-0ec209397118?w=1920&q=95');
+}
+
+.slide:nth-child(4){
+background-image:url('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1920&q=95');
+}
+
+.slide:nth-child(5){
+background-image:url('https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=1920&q=95');
+}
+
+.slide-overlay{
+position:fixed;
+inset:0;
+z-index:1;
+background:rgba(2,6,23,0.55);
 }
 
 /* NAVBAR */
 
 .navbar{
 width:100%;
-padding:18px 40px;
+padding:16px 40px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-background:rgba(15,23,42,.92);
-backdrop-filter:blur(12px);
-border-bottom:1px solid rgba(255,255,255,.06);
+background:rgba(2,6,23,0.50);
+backdrop-filter:blur(18px);
+border-bottom:1px solid rgba(255,255,255,.07);
 position:sticky;
 top:0;
-z-index:999;
+z-index:100;
 }
 
-.logo{
-font-size:34px;
+.nav-left{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.nav-logo{
+font-size:32px;
 font-weight:800;
-color:white;
+background:linear-gradient(135deg,#f8d66d,#d78655);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
-.right{
+/* SUPPORT */
+
+.support-row{
 display:flex;
 align-items:center;
-gap:16px;
+gap:14px;
 }
 
-.user{
+.support-btn{
+display:flex;
+align-items:center;
+gap:8px;
+text-decoration:none;
+color:#facc15;
 font-size:14px;
-color:#cbd5e1;
+font-weight:700;
+background:rgba(255,255,255,.06);
+padding:8px 16px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,.08);
+transition:.3s;
 }
 
-.logout{
-padding:10px 18px;
-background:#ef4444;
+.support-btn:hover{
+transform:translateY(-2px);
+background:rgba(255,255,255,.10);
+}
+
+/* RIGHT */
+
+.nav-right{
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.nav-user{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 16px;
+border-radius:14px;
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.09);
+}
+
+.avatar{
+width:36px;
+height:36px;
+border-radius:50%;
+background:linear-gradient(135deg,#3b82f6,#9333ea);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:15px;
+font-weight:800;
+}
+
+.uname{
+font-size:14px;
+font-weight:600;
+color:rgba(255,255,255,.88);
+}
+
+.uemail{
+font-size:11px;
+color:rgba(255,255,255,.40);
+margin-top:1px;
+}
+
+.nav-logout{
+padding:10px 20px;
+background:linear-gradient(135deg,#ef4444,#dc2626);
 border-radius:12px;
 text-decoration:none;
 color:white;
 font-size:13px;
-font-weight:600;
-transition:.3s;
+font-weight:700;
+transition:.25s;
 }
 
-.logout:hover{
-opacity:.9;
+.nav-logout:hover{
 transform:translateY(-2px);
+opacity:.88;
 }
 
 /* HERO */
 
 .hero{
-height:460px;
-
-background:
-linear-gradient(
-rgba(2,6,23,.70),
-rgba(2,6,23,.78)
-),
-
-url('https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=1800&auto=format&fit=crop')
-
-center/cover no-repeat;
-
+position:relative;
+z-index:10;
+min-height:420px;
 display:flex;
-justify-content:center;
 align-items:center;
+justify-content:center;
 text-align:center;
-padding:20px;
+padding:60px 20px 100px;
 }
 
 .hero-content{
-max-width:900px;
+max-width:860px;
+}
+
+.hero-badge{
+display:inline-block;
+margin-bottom:20px;
+padding:8px 20px;
+border-radius:999px;
+background:rgba(59,130,246,.18);
+border:1px solid rgba(59,130,246,.30);
+font-size:12px;
+font-weight:700;
+letter-spacing:1px;
+color:#93c5fd;
+text-transform:uppercase;
 }
 
 .hero h1{
-font-size:74px;
+font-size:68px;
 font-weight:800;
-margin-bottom:18px;
-line-height:1.1;
+letter-spacing:-2px;
+line-height:1.05;
+margin-bottom:16px;
+text-shadow:0 4px 40px rgba(0,0,0,.55);
+}
+
+.hero h1 span{
+background:linear-gradient(135deg,#f8d66d,#fb923c);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
 .hero p{
-font-size:20px;
-color:#cbd5e1;
+font-size:18px;
+color:rgba(255,255,255,.68);
 font-weight:500;
+margin-bottom:22px;
 }
 
-#clock{
-margin-top:20px;
-font-size:19px;
-font-weight:600;
-color:#e2e8f0;
+/* SECTION */
+
+.section{
+position:relative;
+z-index:10;
+max-width:1280px;
+margin:auto;
+padding:0 32px 70px;
+}
+
+/* STATS */
+
+.stats{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:22px;
+margin-top:-40px;
+margin-bottom:40px;
+position:relative;
+z-index:20;
+}
+
+.stat-card{
+padding:28px;
+border-radius:24px;
+background:rgba(4,10,30,0.55);
+border:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(12px);
+box-shadow:0 8px 28px rgba(0,0,0,.30);
+text-decoration:none;
+color:white;
+transition:.3s;
+}
+
+.stat-card:hover{
+transform:translateY(-5px);
+}
+
+.stat-card h3{
+font-size:15px;
+margin-bottom:12px;
+color:rgba(255,255,255,.65);
+}
+
+.stat-card h1{
+font-size:52px;
+font-weight:800;
+}
+
+.s1{
+border-top:4px solid #22c55e;
+}
+
+.s2{
+border-top:4px solid #facc15;
+}
+
+.s3{
+border-top:4px solid #ef4444;
+}
+
+/* SECTION TITLE */
+
+.section-title{
+font-size:22px;
+font-weight:800;
+margin-bottom:20px;
+color:rgba(255,255,255,.90);
 }
 
 /* CARDS */
 
 .cards{
-width:100%;
-max-width:1300px;
-margin:auto;
-margin-top:-70px;
-padding:0 30px 60px;
 display:grid;
 grid-template-columns:repeat(3,1fr);
-gap:28px;
-position:relative;
-z-index:10;
+gap:24px;
 }
 
 .card{
-background:rgba(15,23,42,.94);
-border:1px solid rgba(255,255,255,.07);
-border-radius:28px;
-padding:38px;
+padding:36px;
+border-radius:26px;
+background:rgba(4,10,30,0.55);
+border:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(12px);
 text-decoration:none;
 color:white;
-transition:.35s;
-backdrop-filter:blur(12px);
-box-shadow:
-0 10px 30px rgba(0,0,0,.35);
+transition:.30s;
+box-shadow:0 8px 28px rgba(0,0,0,.30);
 position:relative;
 overflow:hidden;
 }
 
-.card::before{
-content:'';
-position:absolute;
-top:-80px;
-right:-80px;
-width:180px;
-height:180px;
-background:rgba(59,130,246,.12);
-border-radius:50%;
-transition:.4s;
-}
-
-.card:hover::before{
-transform:scale(1.4);
-}
-
 .card:hover{
-transform:
-translateY(-8px)
-scale(1.02);
-
-border-color:
-rgba(59,130,246,.45);
-
-box-shadow:
-0 18px 40px rgba(0,0,0,.45);
+transform:translateY(-7px);
 }
 
-.card h2{
-font-size:30px;
-font-weight:800;
-margin-bottom:14px;
-position:relative;
-z-index:2;
+.card-icon{
+font-size:36px;
+margin-bottom:16px;
 }
-
-.card p{
-font-size:15px;
-line-height:1.7;
-color:#94a3b8;
-position:relative;
-z-index:2;
-}
-
-/* BADGE */
 
 .badge{
 display:inline-block;
-padding:8px 14px;
-background:
-linear-gradient(
-135deg,
-#3b82f6,
-#14b8a6
-);
-
+padding:6px 14px;
 border-radius:999px;
-font-size:12px;
+font-size:11px;
 font-weight:700;
-margin-bottom:20px;
-position:relative;
-z-index:2;
+margin-bottom:14px;
+}
+
+.badge.b1{
+background:rgba(59,130,246,.18);
+color:#93c5fd;
+}
+
+.badge.b2{
+background:rgba(16,185,129,.18);
+color:#6ee7b7;
+}
+
+.badge.b3{
+background:rgba(245,158,11,.18);
+color:#fcd34d;
+}
+
+.card h2{
+font-size:24px;
+font-weight:800;
+margin-bottom:12px;
+}
+
+.card p{
+font-size:14px;
+line-height:1.7;
+color:rgba(255,255,255,.55);
+}
+
+.card-arrow{
+position:absolute;
+bottom:24px;
+right:24px;
+font-size:20px;
 }
 
 /* RESPONSIVE */
 
 @media(max-width:1100px){
 
-.cards{
+.cards,
+.stats{
 grid-template-columns:1fr;
-max-width:700px;
 }
 
 .hero h1{
-font-size:58px;
+font-size:52px;
 }
 
 }
 
 @media(max-width:700px){
 
-.navbar{
-padding:16px 20px;
+.hero h1{
+font-size:38px;
 }
 
-.logo{
+.section{
+padding:0 16px 50px;
+}
+
+.navbar{
+padding:14px 20px;
+flex-direction:column;
+gap:18px;
+align-items:flex-start;
+}
+
+.nav-logo{
 font-size:26px;
 }
 
-.hero{
-height:420px;
-}
-
-.hero h1{
-font-size:42px;
-}
-
-.hero p{
-font-size:16px;
-}
-
-#clock{
-font-size:15px;
-}
-
-.cards{
-padding:0 20px 50px;
-margin-top:-50px;
-}
-
-.card{
-padding:28px;
-}
-
-.card h2{
-font-size:24px;
+.nav-right{
+width:100%;
+justify-content:space-between;
 }
 
 }
@@ -289,24 +521,69 @@ font-size:24px;
 
 <body>
 
+<div class="slide-bg">
+
+<div class="slide active"></div>
+<div class="slide"></div>
+<div class="slide"></div>
+<div class="slide"></div>
+<div class="slide"></div>
+
+</div>
+
+<div class="slide-overlay"></div>
+
 <!-- NAVBAR -->
 
 <div class="navbar">
 
-<div class="logo">
+<div class="nav-left">
+
+<div class="nav-logo">
 EstateFlow
 </div>
 
-<div class="right">
+<div class="support-row">
 
-<div class="user">
-Welcome,
-<?= $_SESSION['user_email'] ?>
+<a
+href="support.php"
+class="support-btn">
+
+🎧 Support
+
+</a>
+
+</div>
+
+</div>
+
+<div class="nav-right">
+
+<div class="nav-user">
+
+<div class="avatar">
+<?= strtoupper(substr($userName,0,1)) ?>
+</div>
+
+<div>
+
+<div class="uname">
+<?= htmlspecialchars($userName) ?>
+</div>
+
+<div class="uemail">
+<?= htmlspecialchars($_SESSION['user_email']) ?>
+</div>
+
+</div>
+
 </div>
 
 <a href="user_logout.php"
-class="logout">
-Logout
+class="nav-logout">
+
+🚪 Logout
+
 </a>
 
 </div>
@@ -319,28 +596,86 @@ Logout
 
 <div class="hero-content">
 
+<div class="hero-badge">
+✦ EstateFlow Platform
+</div>
+
 <h1>
-EstateFlow Dashboard
+Welcome Back,<br>
+<span><?= htmlspecialchars($userName) ?></span>
 </h1>
 
 <p>
-Real Estate Management Platform
+Real Estate Management Platform — Manage your deals in real-time
 </p>
 
-<div id="clock"></div>
-
 </div>
 
 </div>
 
-<!-- CARDS -->
+<!-- SECTION -->
+
+<div class="section">
+
+<!-- STATS -->
+
+<div class="stats">
+
+<a href="approved_properties.php"
+class="stat-card s1">
+
+<h3>
+Approved
+</h3>
+
+<h1>
+<?= $approvedProperties ?>
+</h1>
+
+</a>
+
+<a href="pending_properties.php"
+class="stat-card s2">
+
+<h3>
+Pending
+</h3>
+
+<h1>
+<?= $pendingProperties ?>
+</h1>
+
+</a>
+
+<a href="rejected_properties.php"
+class="stat-card s3">
+
+<h3>
+Rejected
+</h3>
+
+<h1>
+<?= $rejectedProperties ?>
+</h1>
+
+</a>
+
+</div>
+
+<div class="section-title">
+📋 Your Management Panel
+</div>
 
 <div class="cards">
 
 <a href="user_jv_lands.php"
 class="card">
 
-<div class="badge">
+<div class="card-icon">
+🤝
+</div>
+
+<div class="badge b1">
 JV MANAGEMENT
 </div>
 
@@ -349,15 +684,23 @@ Add JV Deals
 </h2>
 
 <p>
-Submit premium joint venture land details securely into EstateFlow database system.
+Submit premium joint venture land details securely into the EstateFlow database system.
 </p>
+
+<div class="card-arrow">
+→
+</div>
 
 </a>
 
 <a href="user_outrate_lands.php"
 class="card">
 
-<div class="badge">
+<div class="card-icon">
+🏗️
+</div>
+
+<div class="badge b2">
 OUTRATE MANAGEMENT
 </div>
 
@@ -366,64 +709,63 @@ Add Outrate Deals
 </h2>
 
 <p>
-Add and manage outrate property details with secured submission workflow.
+Add and manage outrate property details with a secured submission workflow.
 </p>
+
+<div class="card-arrow">
+→
+</div>
 
 </a>
 
 <a href="user_builders.php"
 class="card">
 
-<div class="badge">
+<div class="card-icon">
+👷
+</div>
+
+<div class="badge b3">
 BUILDERS & DEVELOPERS
 </div>
 
 <h2>
-Add Builders & Developers
+Add Builders
 </h2>
 
 <p>
 Register trusted builders and development company information professionally.
 </p>
 
+<div class="card-arrow">
+→
+</div>
+
 </a>
 
 </div>
 
-<!-- CLOCK -->
+</div>
 
 <script>
 
-function updateClock(){
+(function(){
 
-const now = new Date();
+var slides=document.querySelectorAll('.slide');
 
-const date = now.toLocaleDateString(
-'en-IN',
-{
-day:'2-digit',
-month:'long',
-year:'numeric'
-}
-);
+var cur=0;
 
-const time = now.toLocaleTimeString(
-'en-IN',
-{
-hour:'2-digit',
-minute:'2-digit',
-second:'2-digit'
-}
-);
+setInterval(function(){
 
-document.getElementById('clock').innerHTML =
-date + " | " + time;
+slides[cur].classList.remove('active');
 
-}
+cur=(cur+1)%slides.length;
 
-setInterval(updateClock,1000);
+slides[cur].classList.add('active');
 
-updateClock();
+},6000);
+
+})();
 
 </script>
 

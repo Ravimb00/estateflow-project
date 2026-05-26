@@ -6,6 +6,7 @@ ini_set('display_errors',1);
 session_start();
 
 include 'config/db.php';
+include 'mail_config.php';
 
 /* ADMIN CHECK */
 
@@ -22,11 +23,208 @@ if(isset($_GET['approve'])){
 
 $id = $_GET['approve'];
 
+/* GET LAND DETAILS */
+
+$getLand = mysqli_fetch_assoc(
+
 mysqli_query(
+
 $conn,
+
+"SELECT * FROM outrate_lands
+WHERE id='$id'"
+
+)
+
+);
+
+/* APPROVE LAND */
+
+mysqli_query(
+
+$conn,
+
 "UPDATE outrate_lands
 SET status='approved'
 WHERE id='$id'"
+
+);
+
+/* GET USER */
+
+$user_id = $getLand['user_id'];
+
+$getUser = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM users
+WHERE id='$user_id'"
+
+)
+
+);
+
+$userEmail = $getUser['email'];
+
+/* SEND MAIL */
+
+$subject = "EstateFlow Property Approval Confirmation";
+
+$body = "
+
+<h2>Hello from EstateFlow 👋</h2>
+
+<p>
+Dear Customer,
+</p>
+
+<p>
+We are pleased to inform you that your submitted Outrate Land request has been successfully approved by the EstateFlow Management Team.
+</p>
+
+<p>
+
+<b>Land Name:</b>
+".$getLand['land_name']." <br>
+
+<b>Location:</b>
+".$getLand['location']." <br>
+
+<b>Status:</b>
+Approved ✅
+
+</p>
+
+<p>
+Our team may contact you shortly regarding the next process and verification steps.
+</p>
+
+<p>
+Thank you for choosing EstateFlow.
+</p>
+
+<p>
+Warm Regards,<br>
+<b>EstateFlow Management Team</b>
+</p>
+
+";
+
+sendMail(
+$userEmail,
+$subject,
+$body
+);
+
+header("Location:manage_outrate.php");
+
+exit();
+
+}
+
+/* REJECT */
+
+if(isset($_GET['reject'])){
+
+$id = $_GET['reject'];
+
+/* GET LAND DETAILS */
+
+$getLand = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM outrate_lands
+WHERE id='$id'"
+
+)
+
+);
+
+/* REJECT LAND */
+
+mysqli_query(
+
+$conn,
+
+"UPDATE outrate_lands
+SET status='Rejected'
+WHERE id='$id'"
+
+);
+
+/* GET USER */
+
+$user_id = $getLand['user_id'];
+
+$getUser = mysqli_fetch_assoc(
+
+mysqli_query(
+
+$conn,
+
+"SELECT * FROM users
+WHERE id='$user_id'"
+
+)
+
+);
+
+$userEmail = $getUser['email'];
+
+/* SEND MAIL */
+
+$subject = "EstateFlow Property Status Update";
+
+$body = "
+
+<h2>Hello from EstateFlow 👋</h2>
+
+<p>
+Dear Customer,
+</p>
+
+<p>
+We regret to inform you that your submitted Outrate Land request could not be approved by the EstateFlow Management Team at this time.
+</p>
+
+<p>
+
+<b>Land Name:</b>
+".$getLand['land_name']." <br>
+
+<b>Location:</b>
+".$getLand['location']." <br>
+
+<b>Status:</b>
+Rejected ❌
+
+</p>
+
+<p>
+For additional information or clarification, please contact EstateFlow Support.
+</p>
+
+<p>
+Thank you for your understanding.
+</p>
+
+<p>
+Warm Regards,<br>
+<b>EstateFlow Management Team</b>
+</p>
+
+";
+
+sendMail(
+$userEmail,
+$subject,
+$body
 );
 
 header("Location:manage_outrate.php");
@@ -227,6 +425,20 @@ font-weight:700;
 
 }
 
+.rejected{
+
+background:#ef4444;
+
+padding:8px 14px;
+
+border-radius:20px;
+
+font-size:12px;
+
+font-weight:700;
+
+}
+
 /* BUTTONS */
 
 .action-btn{
@@ -250,6 +462,13 @@ display:inline-block;
 .approve-btn{
 
 background:#10b981;
+color:white;
+
+}
+
+.reject-btn{
+
+background:#f97316;
 color:white;
 
 }
@@ -355,7 +574,15 @@ echo "<span class='approved'>
 Approved
 </span>";
 
-}else{
+}
+elseif($row['status']=="Rejected"){
+
+echo "<span class='rejected'>
+Rejected
+</span>";
+
+}
+else{
 
 echo "<span class='pending'>
 Pending
@@ -381,9 +608,23 @@ Approve
 
 <?php } ?>
 
+<?php if($row['status']!="Rejected"){ ?>
+
+<a
+class="action-btn reject-btn"
+href="?reject=<?php echo $row['id']; ?>">
+
+Reject
+
+</a>
+
+<?php } ?>
+
 <a
 class="action-btn delete-btn"
-href="?delete=<?php echo $row['id']; ?>">
+href="?delete=<?php echo $row['id']; ?>"
+
+onclick="return confirm('Delete this Outrate Land?')">
 
 Delete
 

@@ -7,6 +7,7 @@ include 'send_mail.php';
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+ini_set('display_errors', 1);
 
 /* LOGIN CHECK */
 
@@ -29,24 +30,19 @@ if(isset($_POST['add_builder'])){
         $_POST['builder_name']
     );
 
-    $preferred_location = mysqli_real_escape_string(
+    $owner_name = mysqli_real_escape_string(
         $conn,
-        $_POST['preferred_location']
+        $_POST['owner_name']
     );
 
-    $acres_needed = mysqli_real_escape_string(
+    $location = mysqli_real_escape_string(
         $conn,
-        $_POST['acres_needed']
+        $_POST['location']
     );
 
-    $purpose_type = mysqli_real_escape_string(
+    $projects_count = mysqli_real_escape_string(
         $conn,
-        $_POST['purpose_type']
-    );
-
-    $jv_type = mysqli_real_escape_string(
-        $conn,
-        $_POST['jv_type']
+        $_POST['projects_count']
     );
 
     $contact_number = mysqli_real_escape_string(
@@ -68,10 +64,9 @@ if(isset($_POST['add_builder'])){
     "INSERT INTO builders
     (
         builder_name,
-        preferred_location,
-        acres_needed,
-        purpose_type,
-        jv_type,
+        owner_name,
+        location,
+        projects_count,
         contact_number,
         email,
         status
@@ -80,10 +75,9 @@ if(isset($_POST['add_builder'])){
     VALUES
     (
         '$builder_name',
-        '$preferred_location',
-        '$acres_needed',
-        '$purpose_type',
-        '$jv_type',
+        '$owner_name',
+        '$location',
+        '$projects_count',
         '$contact_number',
         '$email',
         '$status'
@@ -93,25 +87,24 @@ if(isset($_POST['add_builder'])){
 
     if($insert){
 
-        $success = "Builder Requirement Added Successfully";
+        $success = "Builder Details Added Successfully";
 
         /* ADMIN MAIL NOTIFICATION */
 
         $to = "estateflowofficial@gmail.com";
 
-        $subject = "New Builder Requirement - EstateFlow";
+        $subject = "New Builder Added - EstateFlow";
 
         $body = "
 
-New Builder Requirement Added
+New Builder Details Added
 
-Builder Name       : $builder_name
-Preferred Location : $preferred_location
-Acres Needed       : $acres_needed
-Purpose Type       : $purpose_type
-JV Type            : $jv_type
-Contact Number     : $contact_number
-Email              : $email
+Builder Name   : $builder_name
+Owner Name     : $owner_name
+Location       : $location
+Projects Count : $projects_count
+Contact Number : $contact_number
+Email          : $email
 
 Added By User:
 ".$_SESSION['user_email']."
@@ -325,8 +318,7 @@ margin-bottom:8px;
 color:#94a3b8;
 }
 
-.field input,
-.field select{
+.field input{
 padding:15px;
 background:rgba(255,255,255,.05);
 border:1px solid rgba(255,255,255,.08);
@@ -336,14 +328,8 @@ color:white;
 font-size:14px;
 }
 
-.field input:focus,
-.field select:focus{
+.field input:focus{
 border-color:#3b82f6;
-}
-
-.field select option{
-background:#0f172a;
-color:white;
 }
 
 /* BUTTON */
@@ -452,11 +438,11 @@ Logout
 <div>
 
 <h1>
-Builders Requirements
+Builders & Developers
 </h1>
 
 <p>
-Submit Builder Requirements securely
+Submit Builder and Developer details securely
 </p>
 
 </div>
@@ -470,7 +456,7 @@ Submit Builder Requirements securely
 <div class="card">
 
 <div class="title">
-Add Builder Requirement
+Add Builder
 </div>
 
 <?php if($success!=""){ ?>
@@ -509,12 +495,12 @@ required>
 <div class="field">
 
 <label>
-Preferred Location
+Owner Name
 </label>
 
 <input
 type="text"
-name="preferred_location"
+name="owner_name"
 required>
 
 </div>
@@ -522,74 +508,26 @@ required>
 <div class="field">
 
 <label>
-Acres Needed
+Location
+</label>
+
+<input
+type="text"
+name="location"
+required>
+
+</div>
+
+<div class="field">
+
+<label>
+Projects Count
 </label>
 
 <input
 type="number"
-name="acres_needed"
+name="projects_count"
 required>
-
-</div>
-
-<div class="field">
-
-<label>
-Purpose Type
-</label>
-
-<select
-name="purpose_type"
-id="purpose_type"
-required
-onchange="toggleJVType()"
->
-
-<option value="">
-Select Purpose
-</option>
-
-<option value="JV">
-JV
-</option>
-
-<option value="Outrate">
-Outrate
-</option>
-
-</select>
-
-</div>
-
-<div class="field"
-id="jv_type_box"
-style="display:none;">
-
-<label>
-JV Type
-</label>
-
-<select
-name="jv_type"
->
-
-<option value="">
-Select JV Type
-</option>
-
-<option value="JV Apartment">
-JV Apartment
-</option>
-
-<option value="JV Villa">
-JV Villa
-</option>
-
-<option value="JV Layout">
-JV Layout
-</option>
-
-</select>
 
 </div>
 
@@ -628,11 +566,11 @@ class="btn"
 
 onclick="
 return confirm(
-'Are you sure you want to add this Builder Requirement?'
+'Are you sure you want to add this Builder?'
 )
 ">
 
-Add Requirement
+Add Builder
 
 </button>
 
@@ -645,30 +583,6 @@ Please verify all details before submission
 </div>
 
 </div>
-
-<script>
-
-function toggleJVType(){
-
-let purpose =
-document.getElementById('purpose_type').value;
-
-let jvBox =
-document.getElementById('jv_type_box');
-
-if(purpose == "JV"){
-
-jvBox.style.display = "block";
-
-}else{
-
-jvBox.style.display = "none";
-
-}
-
-}
-
-</script>
 
 </body>
 </html>
