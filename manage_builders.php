@@ -69,29 +69,33 @@ WHERE id='$user_id'"
 
 $userEmail = $getUser['email'];
 
+$userName  = $getUser['name'] ?? "Customer";
+
 /* SEND MAIL */
 
-$subject = "EstateFlow Builder Status Approved";
+$subject = "EstateFlow Builder Availability Approved";
 
 $body = "
 
-<h2>Hello from EstateFlow 👋</h2>
+<h2 style='color:#10b981'>
+Greetings from EstateFlow 🎉
+</h2>
 
 <p>
-Dear Customer,
+Dear <b>".$userName."</b>,
 </p>
 
 <p>
-We are pleased to inform you that your Builder request has been marked as Available successfully by the EstateFlow Management Team.
+We are pleased to inform you that your Builder request has been marked as <b>Available</b> successfully by the EstateFlow Management Team.
 </p>
 
 <p>
 
 <b>Builder Name:</b>
-".$getBuilder['builder_name']." <br>
+".$getBuilder['builder_name']." <br><br>
 
 <b>Location:</b>
-".$getBuilder['location']." <br>
+".$getBuilder['location']." <br><br>
 
 <b>Status:</b>
 Available ✅
@@ -99,12 +103,25 @@ Available ✅
 </p>
 
 <p>
-Thank you for choosing EstateFlow.
+Kindly visit our office along with your company profile and required original documents for further onboarding and verification process.
 </p>
 
 <p>
-Warm Regards,<br>
-<b>EstateFlow Management Team</b>
+
+<b>Required Documents:</b>
+
+<ul>
+<li>Company Profile</li>
+<li>Business Registration</li>
+<li>ID Proof</li>
+<li>Previous Project Details</li>
+</ul>
+
+</p>
+
+<p>
+Thank you for choosing EstateFlow.
+We look forward to working with you.
 </p>
 
 ";
@@ -172,29 +189,37 @@ WHERE id='$user_id'"
 
 $userEmail = $getUser['email'];
 
+$userName  = $getUser['name'] ?? "Customer";
+
 /* SEND MAIL */
 
 $subject = "EstateFlow Builder Status Update";
 
 $body = "
 
-<h2>Hello from EstateFlow 👋</h2>
+<h2 style='color:#ef4444'>
+Greetings from EstateFlow
+</h2>
 
 <p>
-Dear Customer,
+Dear <b>".$userName."</b>,
 </p>
 
 <p>
-Your Builder request has been marked as Unavailable by the EstateFlow Management Team.
+Thank you for your interest and association with EstateFlow.
+</p>
+
+<p>
+Currently your Builder request has been marked as <b>Unavailable</b> by the EstateFlow Management Team based on our present operational requirements and verification review.
 </p>
 
 <p>
 
 <b>Builder Name:</b>
-".$getBuilder['builder_name']." <br>
+".$getBuilder['builder_name']." <br><br>
 
 <b>Location:</b>
-".$getBuilder['location']." <br>
+".$getBuilder['location']." <br><br>
 
 <b>Status:</b>
 Unavailable ❌
@@ -202,12 +227,15 @@ Unavailable ❌
 </p>
 
 <p>
-For additional clarification please contact EstateFlow Support.
+You may reconnect with us in future for upcoming opportunities and onboarding updates.
 </p>
 
 <p>
-Warm Regards,<br>
-<b>EstateFlow Management Team</b>
+For any clarification or support, please contact EstateFlow Support Team.
+</p>
+
+<p>
+Thank you for your understanding and continued support.
 </p>
 
 ";
