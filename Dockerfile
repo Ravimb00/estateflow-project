@@ -1,7 +1,9 @@
 FROM php:8.2-apache
 
-COPY . /var/www/html/
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    && docker-php-ext-install mysqli gd
 
-RUN docker-php-ext-install mysqli gd
+COPY . /var/www/html/
 
 EXPOSE 80
