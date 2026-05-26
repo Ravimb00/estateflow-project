@@ -428,10 +428,10 @@ font-size:40px;
 
 <div class="card">
 
-<div class="nav-logo">
+<div class="logo">
 EstateFlow
-<?= $_SESSION['user_id']; ?>
 </div>
+
 <div class="sub">
 User Login
 </div>
@@ -536,4 +536,3 @@ s[c].classList.add('active');
 
 </body>
 </html>
-
