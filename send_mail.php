@@ -25,7 +25,7 @@ $mail->Username = 'estateflowofficial@gmail.com';
 
 /* APP PASSWORD */
 
-$mail->Password = 'ephriqtmeimdgpoj';
+$mail->Password = 'tldnxxmklghetmri';
 
 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
