@@ -11,122 +11,71 @@ include 'mail_config.php';
 /* ADMIN LOGIN CHECK */
 
 if(!isset($_SESSION['admin'])){
-
-header(
-"Location:admin_login.php"
-);
-
-exit();
-
+    header("Location:admin_login.php");
+    exit();
 }
 
 /* APPROVE JV */
 
 if(isset($_GET['approve'])){
 
-$id = $_GET['approve'];
+    $id = intval($_GET['approve']);
 
-/* GET LAND */
+    /* GET LAND */
+    $getLand = mysqli_fetch_assoc(
+        mysqli_query($conn, "SELECT * FROM jv_lands WHERE id='$id'")
+    );
 
-$getLand = mysqli_fetch_assoc(
+    /* UPDATE STATUS */
+    mysqli_query($conn, "UPDATE jv_lands SET status='approved' WHERE id='$id'");
 
-mysqli_query(
+    /* USER DETAILS */
+    // ✅ submitted_by column use ಮಾಡ್ತಿದ್ದೀವಿ
+    $user_id = $getLand['submitted_by'];
 
-$conn,
+    $getUser = mysqli_fetch_assoc(
+        mysqli_query($conn, "SELECT * FROM users WHERE id='$user_id'")
+    );
 
-"SELECT * FROM jv_lands
-WHERE id='$id'"
+    /* SEND MAIL */
+    if($getUser){
 
-)
+        $userEmail = $getUser['email'];
+        $userName  = isset($getUser['name']) ? $getUser['name'] : "Customer";
 
-);
+        $subject = "EstateFlow Proposal Approval";
 
-/* UPDATE STATUS */
+        $body = "
+        <h2 style='color:#10b981'>Greetings from EstateFlow 🎉</h2>
+        <p>Dear <b>$userName</b>,</p>
+        <p>We are pleased to inform you that your <b>JV Land</b> proposal has been successfully <b style='color:green'>Approved</b> by our management team.</p>
+        <p>
+            <b>Land Name:</b> ".$getLand['land_name']." <br><br>
+            <b>Location:</b> ".$getLand['location']." <br><br>
+            <b>Status:</b> Approved ✅
+        </p>
+        <p>Please visit our office with the following documents:</p>
+        <ul>
+            <li>Original Property Documents</li>
+            <li>Government ID Proof</li>
+            <li>Supporting Land Records</li>
+            <li>Company / Ownership Details (if applicable)</li>
+        </ul>
+        <p>Our team will guide you through the next steps.</p>
+        <p>Thank you for choosing EstateFlow.</p>
+        <p>Warm Regards,<br><b>EstateFlow Management Team</b></p>
+        ";
 
-mysqli_query(
+        $mailResult = sendMail($userEmail, $subject, $body);
 
-$conn,
+        if(!$mailResult){
+            error_log("JV Approve Mail Failed — user_id: $user_id, email: $userEmail");
+        }
 
-"UPDATE jv_lands
-SET status='approved'
-WHERE id='$id'"
+    }
 
-);
-
-/* USER DETAILS */
-
-$user_id = $getLand['user_id'];
-
-$getUser = mysqli_fetch_assoc(
-
-mysqli_query(
-
-$conn,
-
-"SELECT * FROM users
-WHERE id='$user_id'"
-
-)
-
-);
-
-$userEmail = $getUser['email'];
-
-/* SEND MAIL */
-
-$subject = "EstateFlow Property Approval Confirmation";
-
-$body = "
-
-<h2>Hello from EstateFlow 👋</h2>
-
-<p>
-Dear Customer,
-</p>
-
-<p>
-We are pleased to inform you that your submitted JV Land request has been successfully approved by the EstateFlow Management Team.
-</p>
-
-<p>
-
-<b>Land Name:</b>
-".$getLand['land_name']." <br>
-
-<b>Location:</b>
-".$getLand['location']." <br>
-
-<b>Status:</b>
-Approved ✅
-
-</p>
-
-<p>
-Our team may contact you shortly regarding the next process and verification steps.
-</p>
-
-<p>
-Thank you for choosing EstateFlow.
-</p>
-
-<p>
-Warm Regards,<br>
-<b>EstateFlow Management Team</b>
-</p>
-
-";
-
-sendMail(
-$userEmail,
-$subject,
-$body
-);
-
-header(
-"Location:manage_jv.php"
-);
-
-exit();
+    header("Location:manage_jv.php");
+    exit();
 
 }
 
@@ -134,109 +83,59 @@ exit();
 
 if(isset($_GET['reject'])){
 
-$id = $_GET['reject'];
+    $id = intval($_GET['reject']);
 
-/* GET LAND */
+    /* GET LAND */
+    $getLand = mysqli_fetch_assoc(
+        mysqli_query($conn, "SELECT * FROM jv_lands WHERE id='$id'")
+    );
 
-$getLand = mysqli_fetch_assoc(
+    /* UPDATE STATUS */
+    mysqli_query($conn, "UPDATE jv_lands SET status='Rejected' WHERE id='$id'");
 
-mysqli_query(
+    /* USER DETAILS */
+    // ✅ BUG FIX: user_id ಅಲ್ಲ, submitted_by ಉಪಯೋಗಿಸಬೇಕು
+    $user_id = $getLand['submitted_by'];
 
-$conn,
+    $getUser = mysqli_fetch_assoc(
+        mysqli_query($conn, "SELECT * FROM users WHERE id='$user_id'")
+    );
 
-"SELECT * FROM jv_lands
-WHERE id='$id'"
+    /* SEND MAIL */
+    // ✅ BUG FIX: null check add ಮಾಡಿದ್ದೀವಿ
+    if($getUser){
 
-)
+        $userEmail = $getUser['email'];
+        $userName  = isset($getUser['name']) ? $getUser['name'] : "Customer";
 
-);
+        $subject = "EstateFlow Proposal Update";
 
-/* UPDATE STATUS */
+        $body = "
+        <h2 style='color:#ef4444'>Greetings from EstateFlow</h2>
+        <p>Dear <b>$userName</b>,</p>
+        <p>Thank you for submitting your JV Land proposal with EstateFlow.</p>
+        <p>After careful review by our verification team, we regret to inform you that your current proposal could <b style='color:red'>not be approved</b> at this stage due to verification or documentation requirements.</p>
+        <p>
+            <b>Land Name:</b> ".$getLand['land_name']." <br><br>
+            <b>Location:</b> ".$getLand['location']." <br><br>
+            <b>Status:</b> Rejected ❌
+        </p>
+        <p>You may update the required details/documents and submit again in the future.</p>
+        <p>For any assistance or clarification, feel free to contact our support team.</p>
+        <p>We appreciate your interest in working with EstateFlow.</p>
+        <p>Warm Regards,<br><b>EstateFlow Support Team</b></p>
+        ";
 
-mysqli_query(
+        $mailResult = sendMail($userEmail, $subject, $body);
 
-$conn,
+        if(!$mailResult){
+            error_log("JV Reject Mail Failed — user_id: $user_id, email: $userEmail");
+        }
 
-"UPDATE jv_lands
-SET status='Rejected'
-WHERE id='$id'"
+    }
 
-);
-
-/* USER DETAILS */
-
-$user_id = $getLand['user_id'];
-
-$getUser = mysqli_fetch_assoc(
-
-mysqli_query(
-
-$conn,
-
-"SELECT * FROM users
-WHERE id='$user_id'"
-
-)
-
-);
-
-$userEmail = $getUser['email'];
-
-/* SEND MAIL */
-
-$subject = "EstateFlow Property Status Update";
-
-$body = "
-
-<h2>Hello from EstateFlow 👋</h2>
-
-<p>
-Dear Customer,
-</p>
-
-<p>
-We regret to inform you that your submitted JV Land request could not be approved by the EstateFlow Management Team at this time.
-</p>
-
-<p>
-
-<b>Land Name:</b>
-".$getLand['land_name']." <br>
-
-<b>Location:</b>
-".$getLand['location']." <br>
-
-<b>Status:</b>
-Rejected ❌
-
-</p>
-
-<p>
-For additional information or clarification, please contact EstateFlow Support.
-</p>
-
-<p>
-Thank you for your understanding.
-</p>
-
-<p>
-Warm Regards,<br>
-<b>EstateFlow Management Team</b>
-</p>
-
-";
-
-sendMail(
-$userEmail,
-$subject,
-$body
-);
-
-header(
-"Location:manage_jv.php"
-);
-
-exit();
+    header("Location:manage_jv.php");
+    exit();
 
 }
 
@@ -244,35 +143,18 @@ exit();
 
 if(isset($_GET['delete'])){
 
-$id = $_GET['delete'];
+    $id = intval($_GET['delete']);
 
-mysqli_query(
+    mysqli_query($conn, "DELETE FROM jv_lands WHERE id='$id'");
 
-$conn,
-
-"DELETE FROM jv_lands
-WHERE id='$id'"
-
-);
-
-header(
-"Location:manage_jv.php"
-);
-
-exit();
+    header("Location:manage_jv.php");
+    exit();
 
 }
 
 /* FETCH JV LANDS */
 
-$getJV = mysqli_query(
-
-$conn,
-
-"SELECT * FROM jv_lands
-ORDER BY id DESC"
-
-);
+$getJV = mysqli_query($conn, "SELECT * FROM jv_lands ORDER BY id DESC");
 
 ?>
 
@@ -282,16 +164,10 @@ ORDER BY id DESC"
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage JV Lands</title>
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>
-Manage JV Lands
-</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap"
-rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 
@@ -303,182 +179,91 @@ font-family:'Sora',sans-serif;
 }
 
 body{
-
 background:
-linear-gradient(
-rgba(2,6,23,.85),
-rgba(2,6,23,.92)
-),
-
+linear-gradient(rgba(2,6,23,.85),rgba(2,6,23,.92)),
 url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1920&auto=format&fit=crop');
-
 background-size:cover;
 background-position:center;
-
 min-height:100vh;
-
 padding:40px;
-
 color:white;
-
 }
 
 .top{
-
 display:flex;
 justify-content:space-between;
 align-items:center;
-
 margin-bottom:35px;
-
 }
 
 .title{
-
 font-size:46px;
 font-weight:800;
-
 }
 
 .back{
-
 text-decoration:none;
-
 padding:14px 22px;
-
 border-radius:14px;
-
-background:linear-gradient(
-135deg,
-#3b82f6,
-#9333ea
-);
-
+background:linear-gradient(135deg,#3b82f6,#9333ea);
 color:white;
-
 font-weight:700;
-
 }
 
 .table-box{
-
 background:rgba(255,255,255,.08);
-
 border:1px solid rgba(255,255,255,.08);
-
 backdrop-filter:blur(18px);
-
 padding:30px;
-
 border-radius:28px;
-
 overflow:auto;
-
 }
 
 table{
-
 width:100%;
-
 border-collapse:collapse;
-
 }
 
 table th{
-
 text-align:left;
-
 padding-bottom:18px;
-
 color:#94a3b8;
-
 font-size:14px;
-
 }
 
 table td{
-
 padding:18px 0;
-
 border-top:1px solid rgba(255,255,255,.08);
-
 font-size:14px;
-
 }
 
-.pending{
-
-color:#facc15;
-font-weight:700;
-
-}
-
-.approved{
-
-color:#22c55e;
-font-weight:700;
-
-}
-
-.rejected{
-
-color:#f97316;
-font-weight:700;
-
-}
+.pending{ color:#facc15; font-weight:700; }
+.approved{ color:#22c55e; font-weight:700; }
+.rejected{ color:#f97316; font-weight:700; }
 
 .btn{
-
 padding:10px 16px;
-
 border-radius:12px;
-
 text-decoration:none;
-
 font-size:13px;
-
 font-weight:700;
-
 display:inline-block;
-
 margin-right:10px;
-
 }
 
 .approve{
-
-background:linear-gradient(
-135deg,
-#22c55e,
-#16a34a
-);
-
+background:linear-gradient(135deg,#22c55e,#16a34a);
 color:white;
-
 }
 
 .reject{
-
-background:linear-gradient(
-135deg,
-#f59e0b,
-#ea580c
-);
-
+background:linear-gradient(135deg,#f59e0b,#ea580c);
 color:white;
-
 }
 
 .delete{
-
-background:linear-gradient(
-135deg,
-#ef4444,
-#dc2626
-);
-
+background:linear-gradient(135deg,#ef4444,#dc2626);
 color:white;
-
 }
 
 </style>
@@ -488,19 +273,8 @@ color:white;
 <body>
 
 <div class="top">
-
-<div class="title">
-Manage JV Lands
-</div>
-
-<a
-href="admin_dashboard.php"
-class="back">
-
-Dashboard
-
-</a>
-
+    <div class="title">Manage JV Lands</div>
+    <a href="admin_dashboard.php" class="back">Dashboard</a>
 </div>
 
 <div class="table-box">
@@ -508,141 +282,47 @@ Dashboard
 <table>
 
 <tr>
-
-<th>
-Land Name
-</th>
-
-<th>
-Location
-</th>
-
-<th>
-Builder
-</th>
-
-<th>
-Acres
-</th>
-
-<th>
-Deal Value
-</th>
-
-<th>
-Status
-</th>
-
-<th>
-Action
-</th>
-
+    <th>Land Name</th>
+    <th>Location</th>
+    <th>Builder</th>
+    <th>Acres</th>
+    <th>Deal Value</th>
+    <th>Status</th>
+    <th>Action</th>
 </tr>
 
-<?php
-
-while($row = mysqli_fetch_assoc($getJV)){
-
-?>
+<?php while($row = mysqli_fetch_assoc($getJV)){ ?>
 
 <tr>
+    <td><?php echo htmlspecialchars($row['land_name']); ?></td>
+    <td><?php echo htmlspecialchars($row['location']); ?></td>
+    <td><?php echo htmlspecialchars($row['builder']); ?></td>
+    <td><?php echo htmlspecialchars($row['acres']); ?></td>
+    <td><?php echo htmlspecialchars($row['deal_value']); ?></td>
 
-<td>
-<?php echo $row['land_name']; ?>
-</td>
+    <td>
+        <?php
+        if($row['status']=="approved"){
+            echo "<span class='approved'>Approved</span>";
+        } elseif($row['status']=="Rejected"){
+            echo "<span class='rejected'>Rejected</span>";
+        } else {
+            echo "<span class='pending'>Pending</span>";
+        }
+        ?>
+    </td>
 
-<td>
-<?php echo $row['location']; ?>
-</td>
+    <td>
+        <?php if($row['status']!="approved"){ ?>
+            <a href="?approve=<?php echo $row['id']; ?>" class="btn approve">Approve</a>
+        <?php } ?>
 
-<td>
-<?php echo $row['builder']; ?>
-</td>
+        <?php if($row['status']!="Rejected"){ ?>
+            <a href="?reject=<?php echo $row['id']; ?>" class="btn reject">Reject</a>
+        <?php } ?>
 
-<td>
-<?php echo $row['acres']; ?>
-</td>
-
-<td>
-<?php echo $row['deal_value']; ?>
-</td>
-
-<td>
-
-<?php
-
-if($row['status']=="approved"){
-
-?>
-
-<span class="approved">
-Approved
-</span>
-
-<?php
-}
-elseif($row['status']=="Rejected"){
-?>
-
-<span class="rejected">
-Rejected
-</span>
-
-<?php
-}
-else{
-?>
-
-<span class="pending">
-Pending
-</span>
-
-<?php } ?>
-
-</td>
-
-<td>
-
-<?php
-if($row['status']!="approved"){
-?>
-
-<a
-href="?approve=<?php echo $row['id']; ?>"
-class="btn approve">
-
-Approve
-
-</a>
-
-<?php } ?>
-
-<?php
-if($row['status']!="Rejected"){
-?>
-
-<a
-href="?reject=<?php echo $row['id']; ?>"
-class="btn reject">
-
-Reject
-
-</a>
-
-<?php } ?>
-
-<a
-href="?delete=<?php echo $row['id']; ?>"
-class="btn delete"
-
-onclick="return confirm('Delete this JV Land?')">
-
-Delete
-
-</a>
-
-</td>
-
+        <a href="?delete=<?php echo $row['id']; ?>" class="btn delete" onclick="return confirm('Delete this JV Land?')">Delete</a>
+    </td>
 </tr>
 
 <?php } ?>

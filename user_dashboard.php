@@ -10,58 +10,6 @@ if(!isset($_SESSION['user_email'])){
 
 $userName = $_SESSION['user_name'] ?? $_SESSION['user_email'];
 
-/* USER ID */
-
-$user_id = $_SESSION['user_id'];
-
-/* APPROVED */
-
-$approvedProperties = mysqli_num_rows(
-
-mysqli_query(
-
-$conn,
-
-"SELECT * FROM jv_lands
-WHERE user_id='$user_id'
-AND status='approved'"
-
-)
-
-);
-
-/* PENDING */
-
-$pendingProperties = mysqli_num_rows(
-
-mysqli_query(
-
-$conn,
-
-"SELECT * FROM jv_lands
-WHERE user_id='$user_id'
-AND status='pending'"
-
-)
-
-);
-
-/* REJECTED */
-
-$rejectedProperties = mysqli_num_rows(
-
-mysqli_query(
-
-$conn,
-
-"SELECT * FROM jv_lands
-WHERE user_id='$user_id'
-AND status='rejected'"
-
-)
-
-);
-
 ?>
 
 <!DOCTYPE html>
@@ -338,57 +286,6 @@ margin:auto;
 padding:0 32px 70px;
 }
 
-/* STATS */
-
-.stats{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:22px;
-margin-top:-40px;
-margin-bottom:40px;
-position:relative;
-z-index:20;
-}
-
-.stat-card{
-padding:28px;
-border-radius:24px;
-background:rgba(4,10,30,0.55);
-border:1px solid rgba(255,255,255,.08);
-backdrop-filter:blur(12px);
-box-shadow:0 8px 28px rgba(0,0,0,.30);
-text-decoration:none;
-color:white;
-transition:.3s;
-}
-
-.stat-card:hover{
-transform:translateY(-5px);
-}
-
-.stat-card h3{
-font-size:15px;
-margin-bottom:12px;
-color:rgba(255,255,255,.65);
-}
-
-.stat-card h1{
-font-size:52px;
-font-weight:800;
-}
-
-.s1{
-border-top:4px solid #22c55e;
-}
-
-.s2{
-border-top:4px solid #facc15;
-}
-
-.s3{
-border-top:4px solid #ef4444;
-}
-
 /* SECTION TITLE */
 
 .section-title{
@@ -476,8 +373,7 @@ font-size:20px;
 
 @media(max-width:1100px){
 
-.cards,
-.stats{
+.cards{
 grid-template-columns:1fr;
 }
 
@@ -616,51 +512,6 @@ Real Estate Management Platform — Manage your deals in real-time
 <!-- SECTION -->
 
 <div class="section">
-
-<!-- STATS -->
-
-<div class="stats">
-
-<a href="approved_properties.php"
-class="stat-card s1">
-
-<h3>
-Approved
-</h3>
-
-<h1>
-<?= $approvedProperties ?>
-</h1>
-
-</a>
-
-<a href="pending_properties.php"
-class="stat-card s2">
-
-<h3>
-Pending
-</h3>
-
-<h1>
-<?= $pendingProperties ?>
-</h1>
-
-</a>
-
-<a href="rejected_properties.php"
-class="stat-card s3">
-
-<h3>
-Rejected
-</h3>
-
-<h1>
-<?= $rejectedProperties ?>
-</h1>
-
-</a>
-
-</div>
 
 <div class="section-title">
 📋 Your Management Panel

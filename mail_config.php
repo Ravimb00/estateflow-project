@@ -9,9 +9,9 @@ require 'PHPMailer/src/SMTP.php';
 
 /* MAIL CONFIG */
 
-$mail_username = "estateflow.232@gmail.com";
+$mail_username = "estateflowofficial@gmail.com";
 
-$mail_password = "hgninwytbotzvpaw";
+$mail_password = "tldnxxmklghetmri";
 
 /* SEND FUNCTION */
 

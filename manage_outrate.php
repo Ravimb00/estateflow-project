@@ -52,7 +52,7 @@ WHERE id='$id'"
 
 /* GET USER */
 
-$user_id = $getLand['user_id'];
+$user_id = $getLand['submitted_by'];
 
 $getUser = mysqli_fetch_assoc(
 
@@ -67,31 +67,35 @@ WHERE id='$user_id'"
 
 );
 
-$userEmail = $getUser['email'];
-
 /* SEND MAIL */
+
+if($getUser){
+
+$userEmail = $getUser['email'];
 
 $subject = "EstateFlow Property Approval Confirmation";
 
 $body = "
 
-<h2>Hello from EstateFlow 👋</h2>
+<h2 style='color:#10b981'>
+Greetings from EstateFlow 🎉
+</h2>
 
 <p>
 Dear Customer,
 </p>
 
 <p>
-We are pleased to inform you that your submitted Outrate Land request has been successfully approved by the EstateFlow Management Team.
+We are pleased to inform you that your submitted Outrate / JV property request has been successfully approved by the EstateFlow Management Team.
 </p>
 
 <p>
 
-<b>Land Name:</b>
-".$getLand['land_name']." <br>
+<b>Property Name:</b>
+{$getLand['land_name']} <br><br>
 
 <b>Location:</b>
-".$getLand['location']." <br>
+{$getLand['location']} <br><br>
 
 <b>Status:</b>
 Approved ✅
@@ -99,11 +103,37 @@ Approved ✅
 </p>
 
 <p>
-Our team may contact you shortly regarding the next process and verification steps.
+Kindly visit our office with the original property documents and valid ID proof for further verification and onboarding process.
 </p>
 
 <p>
-Thank you for choosing EstateFlow.
+
+<b>Required Documents:</b>
+
+<ul>
+
+<li>Original Property Documents</li>
+
+<li>Government ID Proof</li>
+
+<li>Supporting Land Records</li>
+
+</ul>
+
+</p>
+
+<p>
+
+For support or assistance:
+
+<br><br>
+
+📞 +91 9876543210
+
+<br>
+
+📧 estateflowofficial@gmail.com
+
 </p>
 
 <p>
@@ -118,6 +148,8 @@ $userEmail,
 $subject,
 $body
 );
+
+}
 
 header("Location:manage_outrate.php");
 
@@ -160,7 +192,7 @@ WHERE id='$id'"
 
 /* GET USER */
 
-$user_id = $getLand['user_id'];
+$user_id = $getLand['submitted_by'];
 
 $getUser = mysqli_fetch_assoc(
 
@@ -175,31 +207,39 @@ WHERE id='$user_id'"
 
 );
 
-$userEmail = $getUser['email'];
-
 /* SEND MAIL */
+
+if($getUser){
+
+$userEmail = $getUser['email'];
 
 $subject = "EstateFlow Property Status Update";
 
 $body = "
 
-<h2>Hello from EstateFlow 👋</h2>
+<h2 style='color:#ef4444'>
+Greetings from EstateFlow
+</h2>
 
 <p>
 Dear Customer,
 </p>
 
 <p>
-We regret to inform you that your submitted Outrate Land request could not be approved by the EstateFlow Management Team at this time.
+Thank you for submitting your Outrate / JV property request with EstateFlow.
+</p>
+
+<p>
+After careful review by our verification team, we regret to inform you that your current request could not be approved at this stage.
 </p>
 
 <p>
 
-<b>Land Name:</b>
-".$getLand['land_name']." <br>
+<b>Property Name:</b>
+{$getLand['land_name']} <br><br>
 
 <b>Location:</b>
-".$getLand['location']." <br>
+{$getLand['location']} <br><br>
 
 <b>Status:</b>
 Rejected ❌
@@ -207,16 +247,30 @@ Rejected ❌
 </p>
 
 <p>
-For additional information or clarification, please contact EstateFlow Support.
+You may update the required details/documents and submit again in the future.
 </p>
 
 <p>
-Thank you for your understanding.
+
+For support or clarification:
+
+<br><br>
+
+📞 +91 9876543210
+
+<br>
+
+📧 estateflowofficial@gmail.com
+
+</p>
+
+<p>
+Thank you for your understanding and continued support.
 </p>
 
 <p>
 Warm Regards,<br>
-<b>EstateFlow Management Team</b>
+<b>EstateFlow Support Team</b>
 </p>
 
 ";
@@ -226,6 +280,8 @@ $userEmail,
 $subject,
 $body
 );
+
+}
 
 header("Location:manage_outrate.php");
 
@@ -300,8 +356,6 @@ color:white;
 
 }
 
-/* TITLE */
-
 .title{
 
 font-size:56px;
@@ -310,8 +364,6 @@ font-weight:800;
 margin-bottom:35px;
 
 }
-
-/* TOP */
 
 .top{
 
@@ -322,8 +374,6 @@ align-items:center;
 margin-bottom:25px;
 
 }
-
-/* BTN */
 
 .dashboard-btn{
 
@@ -344,8 +394,6 @@ font-weight:700;
 
 }
 
-/* TABLE BOX */
-
 .table-box{
 
 background:rgba(255,255,255,.08);
@@ -361,8 +409,6 @@ padding:30px;
 overflow:auto;
 
 }
-
-/* TABLE */
 
 table{
 
@@ -394,8 +440,6 @@ border-top:1px solid rgba(255,255,255,.06);
 font-size:14px;
 
 }
-
-/* STATUS */
 
 .pending{
 
@@ -438,8 +482,6 @@ font-size:12px;
 font-weight:700;
 
 }
-
-/* BUTTONS */
 
 .action-btn{
 
